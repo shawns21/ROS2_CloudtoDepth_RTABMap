@@ -25,20 +25,26 @@ def generate_launch_description():
           'Optimizer/GravitySigma':'0' # Disable imu constraints (we are already in 2D)
     }
 
-    remappings=[
+    base_remappings=[
 
-          #Remapping pointcloud to depth image to use this pointcloud topic
+          #Set your pointcloud topic
           ('cloud', 'velodyne_points'),
-
-          #Remapping pointcloud to depth image node to publish to these topics:
-          ('image_raw', '/depth/image16'),
-          ('image', '/depth/image32'),
-            
-          #Basic RGB camera topics
+        
+          #Set your rgb camera topics
           ('camera_info', '/camera/camera_info'),
           ('rgb/image', '/camera/image_raw'),
           ('rgb/camera_info', '/camera/camera_info'),
 
+    ]
+
+    fixed_remappings=[
+
+          #Do not change
+
+          #Remapping pointcloud to depth image node to publish to these topics:
+          ('image_raw', '/depth/image16'),
+          ('image', '/depth/image32'),
+    
           #Making rgbd_sync subscribe to the new topic
           ('depth/image', '/depth/image32')
 
@@ -61,19 +67,19 @@ def generate_launch_description():
          Node(
             package='rtabmap_util', executable='pointcloud_to_depthimage', output='screen',
             parameters=[{'approx_sync':True, 'use_sim_time':use_sim_time, 'fixed_frame_id':'odom'}],
-            remappings=remappings),
+            remappings=base_remappings + fixed_remappings),
 
         Node(
             package='rtabmap_sync', executable='rgbd_sync', output='screen',
             parameters=[{'approx_sync':True, 'use_sim_time':use_sim_time}],
-            remappings=remappings),
+            remappings=base_remappings + fixed_remappings),
 
         # SLAM Mode:
         Node(
             condition=UnlessCondition(localization),
             package='rtabmap_slam', executable='rtabmap', output='screen',
             parameters=[parameters],
-            remappings=remappings,
+            remappings=base_remappings + fixed_remappings,
             arguments=['-d']),
             
         # Localization mode:
@@ -84,12 +90,12 @@ def generate_launch_description():
             parameters=[parameters,
               {'Mem/IncrementalMemory':'False',
                'Mem/InitWMWithAllNodes':'True'}],
-            remappings=remappings),
+            remappings=base_remappings + fixed_remappings),
 
         Node(
             package='rtabmap_viz', executable='rtabmap_viz', output='screen',
             parameters=[parameters],
-            remappings=remappings),
+            remappings=base_remappings + fixed_remappings),
 
                 
         # Obstacle detection with the camera for nav2 local costmap.
