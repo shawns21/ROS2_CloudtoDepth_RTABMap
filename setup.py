@@ -11,6 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, [package_name + '/scan.launch.py']),
         ('share/' + package_name, [package_name + '/no_scan.launch.py']),
+        ('share/' + package_name, [package_name + '/dual_camera.launch.py']),
         ('share/' + package_name, ['package.xml']),
     ],
     install_requires=['setuptools'],
